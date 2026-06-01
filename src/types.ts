@@ -27,6 +27,8 @@ export interface Order {
   deliveredDate?: string;
   costDetails?: CostDetails;
   reportGenerated?: boolean;
+  size?: string;
+  color?: string;
 }
 
 export interface DailyReportSummary {

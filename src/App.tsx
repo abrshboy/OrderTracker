@@ -52,18 +52,18 @@ export default function App() {
 
   if (loading) {
     return (
-      <div className="bg-gray-100 min-h-[100dvh] flex justify-center items-center selection:bg-indigo-100">
+      <div className="bg-gray-100 h-[100dvh] w-full flex justify-center items-center selection:bg-indigo-100 overflow-hidden">
         <div className="animate-pulse text-indigo-600 font-bold text-xl">Loading POD Manager...</div>
       </div>
     );
   }
 
   return (
-    <div className="bg-gray-100 min-h-[100dvh] flex justify-center selection:bg-indigo-100 relative">
-      <div className="w-full max-w-md bg-white min-h-[100dvh] flex flex-col relative shadow-2xl ring-1 ring-gray-200">
+    <div className="bg-gray-100 h-[100dvh] w-full flex justify-center selection:bg-indigo-100 relative overflow-hidden">
+      <div className="w-full max-w-md bg-white h-full flex flex-col relative shadow-2xl ring-1 ring-gray-200 overflow-hidden">
         
         {/* Content Area */}
-        <div className="flex-1 overflow-hidden flex flex-col">
+        <div className="flex-1 overflow-hidden flex flex-col relative h-full">
           {currentView === 'dashboard' && <Dashboard orders={orders} onNavigate={navigateTo} onFinishDay={handleFinishDay} />}
           {currentView === 'create' && <CreateOrder onSave={handleAddOrder} onCancel={() => navigateTo('dashboard')} />}
           {currentView === 'list' && <OrderList orders={orders} onOrderClick={(id) => navigateTo('details', id)} />}

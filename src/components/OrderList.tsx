@@ -2,6 +2,25 @@ import { useState } from 'react';
 import { Order, OrderStatus } from '../types';
 import { Search, ChevronRight } from 'lucide-react';
 
+function getVisualColorCode(color?: string): string {
+  if (!color) return '#cbd5e1';
+  const normalized = color.toLowerCase().trim();
+  switch (normalized) {
+    case 'white': return '#ffffff';
+    case 'black': return '#000000';
+    case 'grey':
+    case 'gray': return '#9ca3af';
+    case 'red': return '#dc2626';
+    case 'blue': return '#2563eb';
+    case 'green': return '#10b981';
+    case 'yellow': return '#facc15';
+    case 'navy': return '#1e3a8a';
+    case 'pink': return '#f472b6';
+    case 'purple': return '#9333ea';
+    default: return '#64748b';
+  }
+}
+
 export function OrderList({ orders, onOrderClick }: { orders: Order[], onOrderClick: (id: string) => void }) {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<OrderStatus | 'All'>('All');
@@ -53,8 +72,21 @@ export function OrderList({ orders, onOrderClick }: { orders: Order[], onOrderCl
                   <span className="text-xs text-gray-500">{order.id}</span>
                 </div>
                 <div className="text-sm text-gray-600 truncate">{order.orderType} • Qty: {order.quantity}</div>
-                <div className="mt-2 inline-block px-2 py-1 rounded text-xs font-semibold bg-gray-100 text-gray-700">
-                  {order.status}
+                <div className="mt-2 flex flex-wrap gap-1.5 items-center">
+                  <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-100">
+                    {order.status}
+                  </span>
+                  {order.size && (
+                    <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-100 uppercase">
+                      Sz: {order.size}
+                    </span>
+                  )}
+                  {order.color && (
+                    <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-gray-50 text-gray-600 border border-gray-100 flex items-center space-x-1">
+                      <span className="w-1.5 h-1.5 rounded-full border border-gray-300 inline-block shrink-0" style={{ backgroundColor: getVisualColorCode(order.color) }} />
+                      <span>{order.color}</span>
+                    </span>
+                  )}
                 </div>
               </div>
               <ChevronRight className="w-5 h-5 text-gray-300" />

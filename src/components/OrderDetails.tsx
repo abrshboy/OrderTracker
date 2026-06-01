@@ -2,6 +2,25 @@ import { useState } from 'react';
 import { Order, OrderStatus, CostDetails } from '../types';
 import { ArrowLeft, Clock, Phone, MessageCircle, Trash2 } from 'lucide-react';
 
+function getVisualColorCode(color?: string): string {
+  if (!color) return '#cbd5e1';
+  const normalized = color.toLowerCase().trim();
+  switch (normalized) {
+    case 'white': return '#ffffff';
+    case 'black': return '#000000';
+    case 'grey':
+    case 'gray': return '#9ca3af';
+    case 'red': return '#dc2626';
+    case 'blue': return '#2563eb';
+    case 'green': return '#10b981';
+    case 'yellow': return '#facc15';
+    case 'navy': return '#1e3a8a';
+    case 'pink': return '#f472b6';
+    case 'purple': return '#9333ea';
+    default: return '#64748b';
+  }
+}
+
 export function OrderDetails({ 
   order, onBack, onUpdate, onCheckCustomer, onDelete 
 }: { 
@@ -16,6 +35,13 @@ export function OrderDetails({
     otherCost: order.costDetails?.otherCost || 0,
     sellingPrice: order.costDetails?.sellingPrice || 0,
   });
+  const [newSize, setNewSize] = useState<string>(order.size || 'M');
+  const [newColor, setNewColor] = useState<string>(order.color || 'Black');
+  const [customColor, setCustomColor] = useState<string>(
+    ['White', 'Black', 'Grey', 'Red', 'Blue', 'Green', 'Yellow', 'Navy', 'Pink', 'Purple'].includes(order.color || '') 
+      ? '' 
+      : (order.color || '')
+  );
   const [editMode, setEditMode] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
@@ -28,7 +54,12 @@ export function OrderDetails({
   const needsReminder = (order.status === 'Waiting Design' || order.status === 'Waiting Customer Reply') && daysSinceFollowUp >= 3;
 
   const handleUpdateStatus = () => {
-    const updates: Partial<Order> = { status: newStatus };
+    const finalColor = newColor === 'Other' ? (customColor.trim() || 'Other') : newColor;
+    const updates: Partial<Order> = { 
+      status: newStatus,
+      size: newSize,
+      color: finalColor
+    };
     if (newStatus === 'Rescheduled' && rescheduledDate) {
       updates.rescheduledDate = rescheduledDate;
     }
@@ -101,6 +132,22 @@ export function OrderDetails({
                 <div className="text-xs text-gray-500 mb-1">Quantity</div>
                 <div className="text-sm font-medium text-gray-900">{order.quantity}</div>
              </div>
+             <div>
+                <div className="text-xs text-gray-500 mb-1">Size</div>
+                <div className="text-sm font-semibold text-indigo-700 bg-indigo-50/80 px-2 my-0.5 rounded border border-indigo-100 inline-block text-xs uppercase">
+                  {order.size || 'N/A'}
+                </div>
+             </div>
+             <div>
+                <div className="text-xs text-gray-500 mb-1">Color</div>
+                <div className="text-sm font-medium text-gray-900 flex items-center space-x-1.5 my-0.5">
+                  <span 
+                    className="w-2.5 h-2.5 rounded-full inline-block border border-gray-300 shadow-xs shrink-0" 
+                    style={{ backgroundColor: getVisualColorCode(order.color) }}
+                  />
+                  <span className="text-xs font-semibold text-gray-700">{order.color || 'N/A'}</span>
+                </div>
+             </div>
              <div className="col-span-2">
                 <div className="text-xs text-gray-500 mb-1">Notes</div>
                 <div className="text-sm text-gray-700 whitespace-pre-wrap">{order.notes || 'None'}</div>
@@ -116,9 +163,48 @@ export function OrderDetails({
           
           {editMode ? (
             <div className="space-y-4 pt-2">
-              <select value={newStatus} onChange={e => setNewStatus(e.target.value as OrderStatus)} className="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-3 text-base focus:ring-2 focus:ring-indigo-500">
-                {statuses.map(s => <option key={s} value={s}>{s}</option>)}
-              </select>
+              <div>
+                <label className="block text-xs font-semibold text-gray-500 mb-1">Status</label>
+                <select value={newStatus} onChange={e => setNewStatus(e.target.value as OrderStatus)} className="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-3 text-base focus:ring-2 focus:ring-indigo-500">
+                  {statuses.map(s => <option key={s} value={s}>{s}</option>)}
+                </select>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-gray-500 mb-1">Size</label>
+                  <select value={newSize} onChange={e => setNewSize(e.target.value)} className="w-full bg-gray-50 border border-gray-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500">
+                    {['S', 'M', 'L', 'XL', '2XL', '3XL', 'N/A'].map(s => <option key={s} value={s}>{s}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-500 mb-1">Color</label>
+                  <select value={newColor} onChange={e => {
+                    setNewColor(e.target.value);
+                    if (e.target.value !== 'Other') {
+                      setCustomColor('');
+                    }
+                  }} className="w-full bg-gray-50 border border-gray-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500">
+                    {['White', 'Black', 'Grey', 'Red', 'Blue', 'Green', 'Yellow', 'Navy', 'Pink', 'Purple', 'Other'].map(c => <option key={c} value={c}>{c}</option>)}
+                  </select>
+                </div>
+              </div>
+
+              {(newColor === 'Other' || !['White', 'Black', 'Grey', 'Red', 'Blue', 'Green', 'Yellow', 'Navy', 'Pink', 'Purple'].includes(newColor)) && (
+                <div>
+                  <label className="block text-xs font-semibold text-gray-500 mb-1">Custom Color</label>
+                  <input 
+                    type="text" 
+                    placeholder="E.g., Orange, Teal..." 
+                    value={customColor || (['White', 'Black', 'Grey', 'Red', 'Blue', 'Green', 'Yellow', 'Navy', 'Pink', 'Purple'].includes(newColor) ? '' : newColor)}
+                    onChange={e => {
+                      setCustomColor(e.target.value);
+                      setNewColor('Other');
+                    }}
+                    className="w-full bg-gray-50 border border-gray-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500"
+                  />
+                </div>
+              )}
               
               {newStatus === 'Rescheduled' && (
                 <div>

@@ -3,3 +3,22 @@
 @theme {
   --spacing-safe: env(safe-area-inset-bottom);
 }
+
+html, body, #root {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  position: fixed;
+  background-color: #f3f4f6; /* matches bg-gray-100 */
+}
+
+/* Hide scrollbars for cleaner aesthetic while keeping scrolls working */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
