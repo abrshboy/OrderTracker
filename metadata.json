@@ -1,0 +1,8 @@
+{
+  "name": "Remix: POD Order Manager",
+  "description": "A lightweight, offline-first mobile PWA for managing Print-on-Demand orders, tracking statuses, and tracking delivery profits.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

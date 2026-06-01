@@ -1,0 +1,5 @@
+@import "tailwindcss";
+
+@theme {
+  --spacing-safe: env(safe-area-inset-bottom);
+}
