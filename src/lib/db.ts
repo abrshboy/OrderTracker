@@ -1,21 +1,22 @@
 import { openDB, DBSchema } from 'idb';
-import { Order, DailyReport } from '../types';
+import { Order } from '../types';
 
 interface PODDB extends DBSchema {
   orders: {
     key: string;
     value: Order;
   };
-  reports: {
-    key: string;
-    value: DailyReport;
-  };
 }
 
-const dbPromise = openDB<PODDB>('pod-manager-db', 1, {
-  upgrade(db) {
-    db.createObjectStore('orders', { keyPath: 'id' });
-    db.createObjectStore('reports', { keyPath: 'id' });
+const dbPromise = openDB<PODDB>('pod-manager-db', 2, {
+  upgrade(db, oldVersion, newVersion) {
+    if (oldVersion < 1) {
+      db.createObjectStore('orders', { keyPath: 'id' });
+    }
+    // Handle migration clean if any
+    if (oldVersion >= 1 && !db.objectStoreNames.contains('orders')) {
+      db.createObjectStore('orders', { keyPath: 'id' });
+    }
   },
 });
 
@@ -38,18 +39,14 @@ export async function putOrders(orders: Order[]) {
   await tx.done;
 }
 
-export async function getAllReports() {
-  const db = await dbPromise;
-  return db.getAll('reports');
-}
-
-export async function putReport(report: DailyReport) {
-  const db = await dbPromise;
-  await db.put('reports', report);
-}
-
 export async function deleteOrder(id: string) {
   const db = await dbPromise;
   await db.delete('orders', id);
 }
 
+export async function clearAllOrders() {
+  const db = await dbPromise;
+  const tx = db.transaction('orders', 'readwrite');
+  await tx.store.clear();
+  await tx.done;
+}
